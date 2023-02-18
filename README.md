@@ -4,7 +4,7 @@ Because of the CVE-2023-20032 vulnerability, it is recommended to upgrade Clamav
 ## 1. Download
 
 ```bash
-git clone https://github.com/marekbeckmann/Clamav-Installation-Script-.git ~/clamav-installation-script
+git clone https://github.com/marekbeckmann/Clamav-Installation-Script.git ~/clamav-installation-script
 cd ~/clamav-installation-script && chmod +x install-clamav.sh
 ``` 
 
