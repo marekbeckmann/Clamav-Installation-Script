@@ -177,6 +177,7 @@ function testingClamav() {
     else
         msg_error "Clamdscan is not working"
     fi
+    rm -rf /tmp/eicar.com >/dev/null 2>&1
 }
 
 function installUnoficcialSigs() {
