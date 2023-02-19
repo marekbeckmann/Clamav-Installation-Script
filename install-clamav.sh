@@ -162,7 +162,8 @@ function installClamav() {
 }
 
 function testingClamav() {
-    msg_info "Testing Clamscan with EICAR"
+    msg_info "Testing Clamscan with EICAR (This might take a while)"
+    sleep 10
     wget https://www.eicar.org/download/eicar.com -O /tmp/eicar.com >/dev/null 2>&1
     clamscan_result="$(clamscan --no-summary --infected /tmp/eicar.com 2>/dev/null | grep FOUND)"
     if [[ -n "$clamscan_result" ]]; then
