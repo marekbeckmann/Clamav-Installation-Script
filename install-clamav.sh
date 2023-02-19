@@ -94,7 +94,7 @@ function installDependencies() {
     apt-get update >/dev/null 2>&1
     apt-get fu∏ll-upgrade -y >/dev/null 2>&1
     apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libbz2-dev libpcre3-dev liblzma-dev libyara-dev libtool automake autoconf pkg-config gcc make pkg-config python3 python3-pip python3-pytest valgrind check libbz2-dev libcurl4-openssl-dev libjson-c-dev libmilter-dev \
-        libncurses5-dev libpcre2-dev libssl-dev libxml2-dev zlib1g-dev gcc libssl-dev python3-pip >/dev/null 2>&1 || errorhandler "Failed to install dependencies"
+    libncurses5-dev libpcre2-dev libssl-dev libxml2-dev zlib1g-dev gcc libssl-dev python3-pip >/dev/null 2>&1 || errorhandler "Failed to install dependencies"
     msg_ok "Basic dependencies installed"
 
     msg_info "Installing CMAKE v${CMAKE_TARGET_VERSION} (This will take a while)"
@@ -179,10 +179,99 @@ function testingClamav() {
     fi
 }
 
+function installUnoficcialSigs() {
+    # This uses the script from https://github.com/extremeshok/clamav-unofficial-sigs
+    # Instructions can be found here: https://github.com/extremeshok/clamav-unofficial-sigs/blob/master/INSTALL.md
+    msg_info "Installing Unofficial Clamav Signatures from @extremeshok"
+    mkdir -p /usr/local/sbin/ >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/clamav-unofficial-sigs.sh -O /usr/local/sbin/clamav-unofficial-sigs.sh >/dev/null 2>&1
+    chmod 755 /usr/local/sbin/clamav-unofficial-sigs.sh >/dev/null 2>&1
+    mkdir -p /etc/clamav-unofficial-sigs/ >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/config/master.conf -O /etc/clamav-unofficial-sigs/master.conf >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/config/user.conf -O /etc/clamav-unofficial-sigs/user.conf >/dev/null 2>&1
+    os_conf=os."$(grep -oP "(?<=^ID=).+" /etc/os-release | tr -d '"')".conf
+    wget "https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/config/os/${os_conf}" -O /etc/clamav-unofficial-sigs/os.conf >/dev/null 2>&1
+    /usr/local/sbin/clamav-unofficial-sigs.sh --force >/dev/null 2>&1
+    /usr/local/sbin/clamav-unofficial-sigs.sh --install-logrotate >/dev/null 2>&1
+    /usr/local/sbin/clamav-unofficial-sigs.sh --install-man >/dev/null 2>1
+    wget https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/systemd/clamav-unofficial-sigs.service -O /etc/systemd/system/clamav-unofficial-sigs.service >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/extremeshok/clamav-unofficial-sigs/master/systemd/clamav-unofficial-sigs.timer -O /etc/systemd/system/clamav-unofficial-sigs.timer >/dev/null 2>&1
+    systemctl enable clamav-unofficial-sigs.service >/dev/null 2>&1
+    systemctl enable clamav-unofficial-sigs.timer >/dev/null 2>&1
+    systemctl start clamav-unofficial-sigs.timer >/dev/null 2>&1
+    if [[ "$(systemctl is-active clamav-unofficial-sigs.timer)" == "active" ]]; then
+        msg_ok "Clamav Unofficial Signatures installed and running"
+    else
+        msg_error "Clamav Unofficial Signatures is not running"
+    fi
+}
+
+function getVersionInfo() {
+    msg_info "Looking for Clamav version"
+    clamav_installed_version="$(clamscan --version 2>/dev/null)"
+    cmake_installed_version="$(cmake --version 2>/dev/null)"
+    rustc_installed_version="$(rustc --version 2>/dev/null)"
+    if [[ -n "$clamav_installed_version" ]]; then
+        msg_ok "${clamav_installed_version} is installed"
+    else
+        msg_warn "Clamav is not installed yet"
+    fi
+    if [[ -n "$cmake_installed_version" ]]; then
+        msg_ok "Cmake v${cmake_installed_version} is installed"
+    else
+        msg_warn "Cmake is not installed yet"
+    fi
+    if [[ -n "$rustc_installed_version" ]]; then
+        msg_ok "Rustc v${rustc_installed_version} is installed"
+    else
+        msg_warn "Rustc is not installed yet"
+    fi
+}
+
+function usage() {
+    echo "Usage: $0 [options]"
+    echo "Options:"
+    echo "  -h, --help                  Display this help message"
+    echo "  -s, --with-unofficial-sigs  Install Clamav Unofficial Signatures"
+    echo "  -o, --only-sigs             Only install Clamav Unofficial Signatures"
+    echo "  -v, --version               Display version information"
+}
+
+function getParams() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        -h | --help)
+            usage
+            exit 0
+            ;;
+        -s | --with-unofficial-sigs)
+            unofficial_sigs=true
+            shift
+            ;;
+        -o | --only-sigs)
+            installUnoficcialSigs
+            exit 0
+            ;;
+        -v | --version)
+            getVersionInfo
+            shift
+            ;;
+        *)
+            msg_error "Unknown parameter passed: $1"
+            usage
+            exit 1
+            ;;
+        esac
+    done
+}
+
 function main() {
     removeExistingClamav
     installDependencies
     installClamav
+    if [[ "$unofficial_sigs" == true ]]; then
+        installUnoficcialSigs
+    fi
     testingClamav
 }
 main "$@"
