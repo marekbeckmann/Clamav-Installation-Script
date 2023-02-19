@@ -267,6 +267,7 @@ function getParams() {
 }
 
 function main() {
+    getParams "$@"
     removeExistingClamav
     installDependencies
     installClamav
