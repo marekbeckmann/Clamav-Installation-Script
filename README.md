@@ -16,4 +16,13 @@ To run the script, simply issue the following with root privileges:
 sudo bash install-clamav.sh
 ```
 
+You can also run the script with the following options:
+
+| Option                        | Description                               | Required |
+| ----------------------------- | ----------------------------------------- | -------- |
+| `-h`                          | Show help                                 | No       |
+| `-s` `--with-unofficial-sigs` | Install Clamav Unofficial Signatures      | No       |
+| `-o` `--only-sigs`            | Only install Clamav Unofficial Signatures | No       |
+| `-v` `--version`              | Show installed Clamav version             | No       |
+
 **Important:** Some of the installation steps take a while. Please be patient and wait for the script to finish.
