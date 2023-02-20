@@ -1,6 +1,8 @@
 # How to use
 
 Because of the CVE-2023-20032 vulnerability, it is recommended to upgrade Clamav to version 1.0.1. This Script will remove any existing Clamav installation and install the newest version. Please note, that this script has only been tested on Debian 11
+
+You can find manual installation instructions [here](https://docs.marekbeckmann.de/books/clamav-antivirus/page/installation).
 ## 1. Download
 
 ```bash
