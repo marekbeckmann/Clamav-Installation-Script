@@ -93,7 +93,7 @@ function installDependencies() {
     msg_info "Installing basic dependencies (This will take a while)"
     apt-get update >/dev/null 2>&1
     apt-get fu∏ll-upgrade -y >/dev/null 2>&1
-    apt-get install -y build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libbz2-dev libpcre3-dev liblzma-dev libyara-dev libtool automake autoconf pkg-config gcc make pkg-config python3 python3-pip python3-pytest valgrind check libbz2-dev libcurl4-openssl-dev libjson-c-dev libmilter-dev \
+    apt-get install -y curl build-essential libssl-dev libcurl4-openssl-dev libxml2-dev libbz2-dev libpcre3-dev liblzma-dev libyara-dev libtool automake autoconf pkg-config gcc make pkg-config python3 python3-pip python3-pytest valgrind check libbz2-dev libcurl4-openssl-dev libjson-c-dev libmilter-dev \
     libncurses5-dev libpcre2-dev libssl-dev libxml2-dev zlib1g-dev gcc libssl-dev python3-pip >/dev/null 2>&1 || errorhandler "Failed to install dependencies"
     msg_ok "Basic dependencies installed"
 
